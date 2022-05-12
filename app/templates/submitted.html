@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static '/app/css/main.css' %}">
+  <title>CSHUB</title>
+</head>
+<body class="p-3 text-xs sm:text-base lg:text-lg">
+  {% include 'header.html' %}
+
+  <div class="mt-6 px-3">
+    <div class="mt-12 mx-10">                
+      <h1 class="text-5xl font-medium text-center">
+        Thank you for your help!
+      </h1>
+      <p class="mt-6 text-xl font-base text-center">
+        We will update the page soon
+      </p>
+
+      <div class="mt-6 flex justify-center gap-x-6">
+        <a href="{% url 'course' cid=course_id %}"
+        class="px-2 py-2 sm:px-4 text-center
+        font-normal text-white rounded-md bg-[#154854] transition hover:bg-[#1B5E6D]">
+          Return to Course Page
+        </a>
+        <a href="{% url 'home' %}"
+        class="px-2 py-2 sm:px-4 text-center
+        font-normal text-white rounded-md bg-[#154854] transition hover:bg-[#1B5E6D]">
+          Return to Home Page
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

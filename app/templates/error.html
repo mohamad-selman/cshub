@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static '/app/css/main.css' %}">
+  <title>CSHUB</title>
+</head>
+<body>
+  <div class="flex items-center justify-center w-screen h-screen bg-[#0079D7]">
+    <a href="{% url 'home' %}"
+    class="text-3xl text-white md:text-5xl lg:text-7xl">ERROR <span class="pl-3 font-bold text-5xl md:text-7xl lg:text-9xl">:(</span></a>
+  </div>
+</body>

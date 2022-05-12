@@ -1,0 +1,54 @@
+{% load static %}
+
+<header class="border-b border-netural-100 p-3">
+  <div class="container mx-auto flex items-center justify-between relative">
+    <a href="{% url 'home' %}">
+      <img src="{% static 'app/img/logo.svg' %}" alt="Logo" width=100>
+    </a>
+      <nav>
+        <ul class="flex gap-x-3 items-center">
+          <li>
+            <a href="{% url 'home' %}" class="flex px-2 py-2 sm:px-4
+            rounded-md font-normal transition
+            hover:bg-neutral-300 active:bg-transparent">
+              Search
+            </a>
+          </li>
+          <li>
+            {% if user.is_authenticated %}
+            <div class="dropdown inline-block relative">
+              <button class="px-2 py-2 sm:px-4
+              font-normal text-white flex items-center
+              rounded-md bg-[#154854] transition hover:bg-[#1B5E6D]"
+              type="button">
+                Hey {{ user.get_username}}
+                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              <div class="dropdown-menu absolute hidden 
+              bg-[#afbdc1] w-full
+              rounded divide-y divide-gray-100 shadow">
+                <ul class="py-1 text-black">
+                <li>
+                  <a href="{% url 'dashboard' %}" class="block py-2 px-4 hover:bg-[#879ca3]">Dashboard</a>
+                </li>
+                <li>
+                  <a href="{% url 'logout' %}" class="block py-2 px-4 hover:bg-[#879ca3]">Sign out</a>
+                </li>
+              </div>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="flex items-center px-2 py-2 sm:px-4
+            font-normal text-white rounded-md bg-[#154854] transition hover:bg-[#1B5E6D]">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Login/Signup
+            </a>
+            {% endif %}
+          </li>
+        </ul>
+      </nav>
+  </div>
+</header>

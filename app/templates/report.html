@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static '/app/css/main.css' %}">
+  <title>CSHUB</title>
+</head>
+<body class="p-3 text-base sm:text-lg lg:text-xl">
+  {% include 'header.html' %}
+
+  <div class="mt-6 px-3">
+    <form action="{% url 'submit_report' cid=course_id rid=resource_id %}" method="POST">
+      {% csrf_token %}
+      <div class="md:w-5/6 lg:w-2/3 xl:1/3">
+        <p class="mt-7">
+          Please describe why are you reporting this resource?
+        </p>
+        <textarea rows=7 placeholder="Description ..." name="descr" required
+        class="border rounded-md border-neutral-300
+        mt-2 px-3 py-1.5 w-full"></textarea>
+      </div>
+
+      <div class="flex justify-center mt-3 mb-10">
+        <button type='submit'
+        class="px-6 py-2 text-white text-lg
+        rounded-md bg-[#154854] transition hover:bg-[#1B5E6D]">
+          Submit
+        </button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

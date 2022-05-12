@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static '/app/css/main.css' %}">
+  <title>CSHUB</title>
+</head>
+<body class="p-3 text-xs sm:text-base lg:text-lg">
+  {% include 'header.html' %}
+
+  <div class="mt-6 px-3 lg:w-5/6 xl:w-8/10">
+    <div class="sm:flex justify-between mb-3">
+      <h1 class="mb-4 sm:mb-0 text-2xl font-semibold">
+        {{course_id}}: {{course_name}}
+      </h1>
+      <div class="flex gap-x-3 items-center justify-between">
+        <button class="flex
+        px-2 py-2 sm:px-4 items-center
+        font-light text-white rounded-md bg-[#154854] transition hover:bg-[#1B5E6D]"
+        onclick="location.href = `{% url 'add' cid=course_id %}`;">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <p class="pl-3 text-lg">Add a resource</p>
+        </button>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      </div>
+    </div>
+
+    {% if count is None %}
+    <p class="mt-16 text-3xl font-semibold">This course has no resources yet :(</p>
+    {% endif %}
+
+    <!-- Videos -->
+    {% if V %}
+    <div class="bg-neutral-200 rounded-md py-4 px-6 my-4">
+      <h2 class="text-lg font-medium mb-4">
+        Videos
+      </h2>
+      <ul>
+        {% for r in V %}
+        <li class="pb-1.5 mb-2 border-b border-black">
+          <a href="http://{{r.url}}" class="text-[#154854]">
+            {{r.title}}
+          </a>
+          {% if r.descr %}
+          <p class="mt-3">{{r.descr}}</p>
+          {% endif %}
+          <div class="flex justify-between mt-3">
+            <!-- report -->
+            <button onclick="location.href = `{% url 'report' cid=course_id rid=r.resource_id %}`;">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+              </svg>
+            </button>
+            <form class="flex gap-x-6" action="{% url 'vote' cid=course_id rid=r.resource_id %}" method="POST">
+              {% csrf_token %}
+              <!-- upvote -->
+              <div class="flex mt-2">
+                <button type="submit" name="vote" value="U">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.upvotes | default_if_none:"0"}}</span>
+              </div>
+              <!-- downvote -->
+              <div class="flex justify-end mt-2">
+                <button type="submit" name="vote" value="D">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.downvotes | default_if_none:"0"}}</span>
+              </div>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Books -->
+    {% if B %}
+    <div class="bg-neutral-200 rounded-md py-4 px-6 my-4">
+      <h2 class="text-lg font-medium mb-4">
+        Books
+      </h2>
+      <ul>
+        {% for r in B %}
+        <li class="pb-1.5 mb-2 border-b border-black">
+          <a href="http://{{r.url}}" class="text-[#154854]">
+            {{r.title}}
+          </a>
+          {% if r.descr %}
+          <p class="mt-3">{{r.descr}}</p>
+          {% endif %}
+          <div class="flex justify-between mt-3">
+            <!-- report -->
+            <button onclick="location.href = `{% url 'report' cid=course_id rid=r.resource_id %}`;">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+              </svg>
+            </button>
+            <form class="flex gap-x-6" action="{% url 'vote' cid=course_id rid=r.resource_id %}" method="POST">
+              {% csrf_token %}
+              <!-- upvote -->
+              <div class="flex mt-2">
+                <button type="submit" name="vote" value="U">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.upvotes | default_if_none:"0"}}</span>
+              </div>
+              <!-- downvote -->
+              <div class="flex justify-end mt-2">
+                <button type="submit" name="vote" value="D">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.downvotes | default_if_none:"0"}}</span>
+              </div>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  
+    <!-- Article -->
+    {% if A %}
+    <div class="bg-neutral-200 rounded-md py-4 px-6 my-4">
+      <h2 class="text-lg font-medium mb-4">
+        Articles
+      </h2>
+      <ul>
+        {% for r in A %}
+        <li class="pb-1.5 mb-2 border-b border-black">
+          <a href="http://{{r.url}}" class="text-[#154854]">
+            {{r.title}}
+          </a>
+          {% if r.descr %}
+          <p class="mt-3">{{r.descr}}</p>
+          {% endif %}
+          <div class="flex justify-between mt-3">
+            <!-- report -->
+            <button onclick="location.href = `{% url 'report' cid=course_id rid=r.resource_id %}`;">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+              </svg>
+            </button>
+            <form class="flex gap-x-6" action="{% url 'vote' cid=course_id rid=r.resource_id %}" method="POST">
+              {% csrf_token %}
+              <!-- upvote -->
+              <div class="flex mt-2">
+                <button type="submit" name="vote" value="U">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.upvotes | default_if_none:"0"}}</span>
+              </div>
+              <!-- downvote -->
+              <div class="flex justify-end mt-2">
+                <button type="submit" name="vote" value="D">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.downvotes | default_if_none:"0"}}</span>
+              </div>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  
+    <!-- Notes -->
+    {% if N %}
+    <div class="bg-neutral-200 rounded-md py-4 px-6 my-4">
+      <h2 class="text-lg font-medium mb-4">
+        Notes
+      </h2>
+      <ul>
+        {% for r in N %}
+        <li class="pb-1.5 mb-2 border-b border-black">
+          <a href="http://{{r.url}}" class="text-[#154854]">
+            {{r.title}}
+          </a>
+          {% if r.descr %}
+          <p class="mt-3">{{r.descr}}</p>
+          {% endif %}
+          <div class="flex justify-between mt-3">
+            <!-- report -->
+            <button onclick="location.href = `{% url 'report' cid=course_id rid=r.resource_id %}`;">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+              </svg>
+            </button>
+            <form class="flex gap-x-6" action="{% url 'vote' cid=course_id rid=r.resource_id %}" method="POST">
+              {% csrf_token %}
+              <!-- upvote -->
+              <div class="flex mt-2">
+                <button type="submit" name="vote" value="U">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.upvotes | default_if_none:"0"}}</span>
+              </div>
+              <!-- downvote -->
+              <div class="flex justify-end mt-2">
+                <button type="submit" name="vote" value="D">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.downvotes | default_if_none:"0"}}</span>
+              </div>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Slides -->
+    {% if S %}
+    <div class="bg-neutral-200 rounded-md py-4 px-6 my-4">
+      <h2 class="text-lg font-medium mb-4">
+        Slides
+      </h2>
+      <ul>
+        {% for r in S %}
+        <li class="pb-1.5 mb-2 border-b border-black">
+          <a href="http://{{r.url}}" class="text-[#154854]">
+            {{r.title}}
+          </a>
+          {% if r.descr %}
+          <p class="mt-3">{{r.descr}}</p>
+          {% endif %}
+          <div class="flex justify-between mt-3">
+            <!-- report -->
+            <button onclick="location.href = `{% url 'report' cid=course_id rid=r.resource_id %}`;">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+              </svg>
+            </button>
+            <form class="flex gap-x-6" action="{% url 'vote' cid=course_id rid=r.resource_id %}" method="POST">
+              {% csrf_token %}
+              <!-- upvote -->
+              <div class="flex mt-2">
+                <button type="submit" name="vote" value="U">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.upvotes | default_if_none:"0"}}</span>
+              </div>
+              <!-- downvote -->
+              <div class="flex justify-end mt-2">
+                <button type="submit" name="vote" value="D">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.downvotes | default_if_none:"0"}}</span>
+              </div>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Other -->
+    {% if O %}
+    <div class="bg-neutral-200 rounded-md py-4 px-6 my-4">
+      <h2 class="text-lg font-medium mb-4">
+        Other
+      </h2>
+      <ul>
+        {% for r in O %}
+        <li class="pb-1.5 mb-2 border-b border-black">
+          <a href="http://{{r.url}}" class="text-[#154854]">
+            {{r.title}}
+          </a>
+          {% if r.descr %}
+          <p class="mt-3">{{r.descr}}</p>
+          {% endif %}
+          <div class="flex justify-between mt-3">
+            <!-- report -->
+            <button onclick="location.href = `{% url 'report' cid=course_id rid=r.resource_id %}`;">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+              </svg>
+            </button>
+            <form class="flex gap-x-6" action="{% url 'vote' cid=course_id rid=r.resource_id %}" method="POST">
+              {% csrf_token %}
+              <!-- upvote -->
+              <div class="flex mt-2">
+                <button type="submit" name="vote" value="U">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.upvotes | default_if_none:"0"}}</span>
+              </div>
+              <!-- downvote -->
+              <div class="flex justify-end mt-2">
+                <button type="submit" name="vote" value="D">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/>
+                  </svg>
+                </button>
+                <span class="ml-1">{{r.downvotes | default_if_none:"0"}}</span>
+              </div>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+</body>
+</html>

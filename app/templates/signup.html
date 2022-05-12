@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static '/app/css/main.css' %}">
+  <title>CSHUB - Registration</title>
+</head>
+<body class="p-3 text-xs sm:text-base lg:text-lg">
+  {% include 'header.html' %}
+
+  <div class="mt-6 px-3
+  flex flex-col items-center justify-center">
+    <div class="flex flex-col px-4 sm:px-6 md:px-8 lg:px-10 py-8
+    border border-netural-100 rounded-3xl
+    shadow-lg max-w-md">
+      <div class="font-medium self-center text-xl sm:text-3xl text-gray-800">
+        Create An Account
+      </div>
+
+      <div class="mt-7">
+        <form action="{% url 'signup' %}" method="POST">
+          {% csrf_token %}
+          <div class="flex flex-col mb-5">
+            <label for="name"
+            class="mb-1 text-xs tracking-wide text-gray-600">
+              Name:
+            </label>
+            <div class="relative">
+              <div class="inline-flex items-center justify-center
+              absolute left-0 top-0 h-full w-10 text-gray-400">
+                <i class="fas fa-user text-blue-500"></i>
+              </div>
+
+              <input id="name" type="text" name="name" required
+              class="text-sm placeholder-gray-500 pl-10 pr-4 py-2
+              rounded-2xl border border-gray-400 w-full
+              focus:outline-none focus:border-blue-400"
+              placeholder="Enter your name"/>
+            </div>
+          </div>
+          <div class="flex flex-col mb-5">
+            <label for="username" class="mb-1 text-xs tracking-wide text-gray-600">
+              Username:
+            </label>
+            <div class="relative">
+              <div
+              class="inline-flex items-center justify-center
+              absolute left-0 top-0 h-full w-10 text-gray-400">
+                <i class="fas fa-at text-blue-500"></i>
+              </div>
+
+              <input id="username" type="text" name="username" required
+              class="text-sm placeholder-gray-500 pl-10 pr-4 py-2
+              rounded-2xl border border-gray-400 w-full
+              focus:outline-none focus:border-blue-400"
+              placeholder="Enter your username"/>
+            </div>
+          </div>
+          <div class="flex flex-col mb-5">
+            <label for="email" class="mb-1 text-xs tracking-wide text-gray-600">
+              E-Mail Address:
+            </label>
+            <div class="relative">
+              <div class="inline-flex items-center justify-center
+              absolute left-0 top-0 h-full w-10 text-gray-400">
+                <i class="fas fa-at text-blue-500"></i>
+              </div>
+
+              <input
+              id="email"
+              type="email"
+              name="email" required
+              class="text-sm placeholder-gray-500 pl-10 pr-4 py-2
+              rounded-2xl border border-gray-400 w-full
+              focus:outline-none focus:border-blue-400"
+              placeholder="Enter your email"/>
+            </div>
+          </div>
+          <div class="flex flex-col mb-6">
+            <label for="password" class="mb-1 text-xs sm:text-sm tracking-wide text-gray-600">
+                Password:
+            </label>
+            <div class="relative">
+              <div class="inline-flex items-center justify-center
+              absolute left-0 top-0 h-full w-10 text-gray-400">
+                <span>
+                  <i class="fas fa-lock text-blue-500"></i>
+                </span>
+              </div>
+
+              <input id="password" type="password" name="password" required
+              class="text-sm placeholder-gray-500 pl-10 pr-4 py-2
+              rounded-2xl border border-gray-400 w-full
+              focus:outline-none focus:border-blue-400"
+              placeholder="Enter your password"/>
+            </div>
+          </div>
+
+          <div class="flex w-full">
+            <button
+            type="submit"
+            class="flex items-center justify-center mt-2 py-2
+            focus:outline-none text-white text-sm sm:text-base
+            bg-[#154854] hover:bg-[#1B5E6D] rounded-lg w-full
+            transition duration-150 ease-in">
+              <span class="mr-2 uppercase" >Sign Up</span>
+              <span>
+                <svg class="h-6 w-6" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                  <path d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="flex justify-center items-center mt-6">
+      <div class="inline-flex items-center
+      text-gray-700 font-medium text-xs text-center">
+        <span>
+          You have an account?
+          <a href="{% url 'login' %}" class="text-xs ml-1 text-[#F0A501] font-semibold">
+            Login here
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
