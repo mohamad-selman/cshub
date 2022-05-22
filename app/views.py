@@ -9,20 +9,7 @@ from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.models import User
-from django.db import connection
-cursor = connection.cursor()
-
-def dictfetchone(cursor):
-    desc = cursor.description
-    row = cursor.fetchone()
-    return dict(zip([col[0] for col in desc], row))
-
-def dictfetchall(cursor): 
-    desc = cursor.description
-    return [
-        dict(zip([col[0] for col in desc], row)) 
-        for row in cursor.fetchall()
-    ]
+from .db import DB_connect
 
 def index(request):
     return render(request, 'index.html')
@@ -63,11 +50,13 @@ def signup(request):
     return render(request, './signup.html')
 
 def results(request):
+    db, cursor = DB_connect()
+
     cursor.execute('''
         SELECT count(*) AS count
         FROM COURSE
     ''')
-    count = dictfetchone(cursor)
+    count = cursor.fetchone()
 
     cursor.execute('''
         SELECT C.course_id, C.course_name, D.dept_name, RC.count
@@ -83,16 +72,21 @@ def results(request):
         ORDER BY RC.count DESC;
     ''')
     
-    courses = dictfetchall(cursor)
+    courses = cursor.fetchall()
 
     context = {
         'count': count['count'],
         'courses': courses
     }
 
+    cursor.close()
+    db.close()
+
     return render(request, 'results.html', context)
 
 def course(request, cid=None):
+    db, cursor = DB_connect()
+
     cursor.execute(f'''
         SELECT C.course_name, RC.count
         FROM COURSE C
@@ -104,7 +98,7 @@ def course(request, cid=None):
             ON C.course_id=RC.course_id
         WHERE C.course_id={cid};
     ''')
-    course = dictfetchone(cursor)
+    course = cursor.fetchone()
 
     context = {
         'course_id': cid,
@@ -120,30 +114,40 @@ def course(request, cid=None):
                 ON R.resource_id = V.resource_id
             WHERE R.course_id={cid} AND R.type='{type}';
         ''')
-        resources = dictfetchall(cursor)
+        resources = cursor.fetchall()
         context[type] = resources
+
+    cursor.close()
+    db.close()
 
     return render(request, 'course.html', context)
 
 @login_required(login_url='login')
 def add(request, cid=None):
+    db, cursor = DB_connect()
+
     cursor.execute(f'''
         SELECT course_name
         FROM COURSE
         WHERE course_id={cid};
     ''')
-    course = dictfetchone(cursor)
+    course = cursor.fetchone()
 
     context = {
         'course_id': cid,
         'course_name': course['course_name']
     }
 
+    cursor.close()
+    db.close()
+
     return render(request, 'add.html', context)
 
 @login_required(login_url='login')
 @require_http_methods(["POST"])
 def submit(request, cid=None):
+    db, cursor = DB_connect()
+
     type = request.POST['type']
     title = request.POST['title']
     url = request.POST['url']
@@ -161,10 +165,15 @@ def submit(request, cid=None):
         'course_id': cid
     }
 
+    cursor.close()
+    db.close()
+
     return render(request, 'submitted.html', context)
 
 @login_required(login_url='login')
 def vote(request, cid, rid):
+    db, cursor = DB_connect()
+
     requested_vote = request.POST['vote']
 
     cursor.execute(f'''
@@ -196,6 +205,9 @@ def vote(request, cid, rid):
         ''')
         print("Your vote was changed successfully")
 
+    cursor.close()
+    db.close()
+
     return redirect(course, cid=cid)
 
 @login_required(login_url='login')
@@ -210,6 +222,8 @@ def report(request, cid=None, rid=None):
 @login_required(login_url='login')
 @require_http_methods(["POST"])
 def submit_report(request, cid=None, rid=None):
+    db, cursor = DB_connect()
+
     descr = request.POST['descr']
 
     cursor.execute(f'''
@@ -221,25 +235,33 @@ def submit_report(request, cid=None, rid=None):
         'course_id': cid
     }
 
+    cursor.close()
+    db.close()
+
     return render(request, 'submitted.html', context)
 
 def admin_report(request):
+    db, cursor = DB_connect()
+
     cursor.execute(f'''
         SELECT count(*) as count
         FROM USER_REPORT_RESOURCE;
     ''')
-    total = dictfetchone(cursor)
+    total = cursor.fetchone()
 
     cursor.execute(f'''
         SELECT *
         FROM USER_REPORT_RESOURCE;
     ''')
-    reports = dictfetchall(cursor)
+    reports = cursor.fetchall()
 
     context = {
         'count': total['count'],
         'reports': reports,
     }
+
+    cursor.close()
+    db.close()
 
     return render(request, 'all_reports.html', context)
 
