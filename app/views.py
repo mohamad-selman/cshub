@@ -52,13 +52,21 @@ def signup(request):
 def results(request):
     db, cursor = DB_connect()
 
-    cursor.execute('''
+    input = ''
+    if request.method == 'POST':
+        input = request.POST['input']
+
+    if input != '' and input[0] == '0':
+        input = input[1:]
+
+    cursor.execute(f'''
         SELECT count(*) AS count
         FROM COURSE
+        WHERE CAST(course_id as CHAR) LIKE '%{input}%';
     ''')
     count = cursor.fetchone()
 
-    cursor.execute('''
+    cursor.execute(f'''
         SELECT C.course_id, C.course_name, D.dept_name, RC.count
         FROM COURSE C
         JOIN DEPARTMENT D
@@ -69,6 +77,7 @@ def results(request):
                 GROUP BY course_id
             ) RC
             ON C.course_id=RC.course_id
+        WHERE CAST(C.course_id as CHAR) LIKE '%{input}%'
         ORDER BY RC.count DESC;
     ''')
     
@@ -183,6 +192,8 @@ def vote(request, cid, rid):
     ''')
     exsited_vote = cursor.fetchone()
 
+    print(exsited_vote)
+
     if exsited_vote == None:
         cursor.execute(f'''
             INSERT INTO USER_VOTE_RESOURCE(user_id, resource_id, vote_type)
@@ -190,7 +201,7 @@ def vote(request, cid, rid):
         ''')
         print("Your vote was recorded successfully")
 
-    elif exsited_vote[0][0] == requested_vote:
+    elif exsited_vote['vote_type'] == requested_vote:
         cursor.execute(f'''
             DELETE FROM USER_VOTE_RESOURCE
             WHERE resource_id={rid} AND user_id={request.user.id};
@@ -250,10 +261,14 @@ def admin_report(request):
     total = cursor.fetchone()
 
     cursor.execute(f'''
-        SELECT *
-        FROM USER_REPORT_RESOURCE;
+        SELECT RE.resource_id, RE.report_id, RE.user_id, RE.report_date, RE.descr as comment, R.title, R.descr
+        FROM USER_REPORT_RESOURCE RE
+        JOIN S_RESOURCE R
+            ON RE.resource_id = R.resource_id;
     ''')
     reports = cursor.fetchall()
+
+    print(reports)
 
     context = {
         'count': total['count'],
@@ -265,8 +280,59 @@ def admin_report(request):
 
     return render(request, 'all_reports.html', context)
 
+@login_required(login_url='login')
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    db, cursor = DB_connect()
+
+    cursor.execute(f'''
+        SELECT count(*) as count
+        FROM S_RESOURCE
+        WHERE user_id = {request.user.id};
+    ''')
+    total = cursor.fetchone()
+
+    cursor.execute(f'''
+        SELECT *
+        FROM S_RESOURCE
+        WHERE user_id = {request.user.id};
+    ''')
+    resources = cursor.fetchall()
+
+    context = {
+        'count': total['count'],
+        'resources': resources,
+    }
+
+    cursor.close()
+    db.close()
+
+    return render(request, 'dashboard.html', context)
+
+@login_required(login_url='login')
+@require_http_methods(["POST"])
+def delete(request, rid):
+    db, cursor = DB_connect()
+
+    cursor.execute(f'''
+        SELECT user_id
+        FROM S_RESOURCE
+        WHERE resource_id={rid};
+    ''')
+    added_by = cursor.fetchone()
+
+    if added_by['user_id'] == request.user.id or request.user.is_superuser:
+        cursor.execute(f'''
+            DELETE FROM S_RESOURCE
+            WHERE resource_id={rid};
+        ''')
+        print("The resource was removed successfully")
+
+    cursor.close()
+    db.close()
+
+    if request.user.is_superuser:
+            return redirect(admin_report)
+    return redirect(dashboard)
 
 def error(request):
     return render(request, 'error.html')
