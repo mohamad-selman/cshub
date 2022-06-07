@@ -17,4 +17,5 @@ urlpatterns = [
     path('submit_report/<int:cid>/<int:rid>/', views.submit_report, name='submit_report'),
     path('admin/reports/', views.admin_report, name='admin_report'),
     path('delete/<int:rid>/', views.delete, name='delete'),
+    path('watch/<int:cid>/', views.watch, name='watch'),
 ]

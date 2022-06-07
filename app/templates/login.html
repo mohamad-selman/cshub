@@ -27,6 +27,7 @@
       <div class="mt-10">
         <form action="{% url 'login' %}" method="POST">
           {% csrf_token %}
+          <input type="hidden" name="next" value="{{request.GET.next}}"/>
           <div class="flex flex-col mb-5">
             <label for="username" class="mb-1 text-xs tracking-wide text-gray-600">
               Username:

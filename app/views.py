@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.models import User
 from .db import DB_connect
+from django.core.mail import send_mail
 
 def index(request):
     return render(request, 'index.html')
@@ -25,7 +26,9 @@ def login_u(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('dashboard')
+            if request.POST['next']:
+                return redirect(request.POST['next'])
+            return redirect(dashboard)
     return render(request, './login.html')
 
 def logout_u(request):
@@ -85,7 +88,7 @@ def results(request):
 
     context = {
         'count': count['count'],
-        'courses': courses
+        'courses': courses,
     }
 
     cursor.close()
@@ -112,8 +115,20 @@ def course(request, cid=None):
     context = {
         'course_id': cid,
         'course_name': course['course_name'],
-        'count': course['count']
+        'count': course['count'],
+        'watching': 'F',
     }
+
+    if request.user.is_authenticated:
+        cursor.execute(f'''
+            SELECT *
+            FROM USER_WATCH_COURSE
+            WHERE user_id={request.user.id} AND course_id={cid};
+        ''')
+        watching = cursor.fetchone()
+
+        if watching is not None:
+            context['watching'] = 'T'
 
     for type in ['V','A','B','N','S','O']:
         cursor.execute(f'''
@@ -130,6 +145,33 @@ def course(request, cid=None):
     db.close()
 
     return render(request, 'course.html', context)
+
+@login_required(login_url='login')
+def watch(request, cid=None):
+    db, cursor = DB_connect()
+
+    cursor.execute(f'''
+        SELECT *
+        FROM USER_WATCH_COURSE
+        WHERE user_id={request.user.id} AND course_id={cid};
+    ''')
+    watching = cursor.fetchone()
+
+    if watching is None:
+        cursor.execute(f'''
+            INSERT INTO USER_WATCH_COURSE
+            VALUES({request.user.id}, {cid});
+        ''')
+    else:
+        cursor.execute(f'''
+            DELETE FROM USER_WATCH_COURSE
+            WHERE user_id={request.user.id} AND course_id={cid};
+        ''')
+
+    cursor.close()
+    db.close()
+
+    return redirect(course, cid=cid)
 
 @login_required(login_url='login')
 def add(request, cid=None):
@@ -170,6 +212,25 @@ def submit(request, cid=None):
         VALUE({cid}, '{type}', '{title}', '{url}', '{descr}', {request.user.id});
     ''')
 
+    cursor.execute(f'''
+        SELECT U.email, U.username
+        FROM USER_WATCH_COURSE W
+        JOIN auth_user U
+            ON W.user_id = U.id
+        WHERE W.course_id = {cid} and W.user_id != {request.user.id};
+    ''')
+    notify = cursor.fetchall()
+
+    for u in notify:
+        uname = u['username']
+        send_mail(
+            f'New resource get added to {cid}',
+            f'Hi {uname}, a new resource get added to course {cid}.',
+            'cshub.ku@yahoo.com',
+            [u['email']],
+            fail_silently = False, # will raise an smtplib.SMTPException if an error occured
+        )
+
     context = {
         'course_id': cid
     }
@@ -191,8 +252,6 @@ def vote(request, cid, rid):
         WHERE resource_id={rid} AND user_id={request.user.id};
     ''')
     exsited_vote = cursor.fetchone()
-
-    print(exsited_vote)
 
     if exsited_vote == None:
         cursor.execute(f'''
@@ -267,8 +326,6 @@ def admin_report(request):
             ON RE.resource_id = R.resource_id;
     ''')
     reports = cursor.fetchall()
-
-    print(reports)
 
     context = {
         'count': total['count'],
