@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static '/app/css/main.css' %}">
+
+  <title>CSHUB</title>
+</head>
+<body class="p-3 text-xs sm:text-base lg:text-lg">
+  {% include 'header.html' %}
+
+  <div class="mt-6 px-3">
+    <h1 class="text-5xl font-medium text-center">
+      Find what you're looking for.
+    </h1>
+    <p class="mt-4 text-xl text-center">
+      At <span class="font-medium">CSHUB</span>, we have tens of resources to help you with your CS courses.
+    </p>
+    <form class="mx-auto max-w-xl mt-6" action="{% url 'results' %}" method="POST">
+      {% csrf_token %}
+      <label for="search" class="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
+      <div class="relative">
+          <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <input type="search" id="search" name="input" class="block p-4 pl-10 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Search by course number...">
+          <button type="submit" class="text-white absolute right-2.5 bottom-2.5
+          bg-[#154854] hover:bg-[#1B5E6D] focus:ring-4 focus:outline-none focus:ring-[#F9C041]
+          font-medium rounded-lg text-sm px-4 py-2">
+            Search
+          </button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
